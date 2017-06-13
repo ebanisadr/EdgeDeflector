@@ -138,12 +138,29 @@ namespace EdgeDeflector
             Process.Start(launcher);
         }
 
+        static string SwapBingForGoogle(string uri)
+        {
+            //this matches http://www.bing.com and https://www.bing.com only
+            Regex bing_prefix = new Regex(@"^https?:\/\/www.bing.com");
+
+            //this works because any actual ampersands in the query get turned into HTML escape codes
+            //so the only one left marks the start of the flags
+            //it matches anything in the query after an '&', inclusive
+            Regex garbage_flags = new Regex(@"&.*$");
+
+            uri = bing_prefix.Replace(uri, "https://www.google.com");
+            uri = garbage_flags.Replace(uri, string.Empty);
+
+            return uri;
+        }
+
         static void Main(string[] args)
         {
             // Assume argument is URI
             if (args.Length == 1 && IsMsEdgeUri(args[0]))
             {
                 string uri = RewriteMsEdgeUriSchema(args[0]);
+                uri = SwapBingForGoogle(uri);
                 OpenUri(uri);
             }
             // Install when running without argument
