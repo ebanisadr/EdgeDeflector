@@ -1,8 +1,16 @@
-﻿using Microsoft.Win32;
+/*
+ * Copyright © 2017 Daniel Aleksandersen
+ * SPDX-License-Identifier: MIT
+ * License-Filename: LICENSE
+ */
+
+using Microsoft.Win32;
 using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace EdgeDeflector
 {
@@ -92,8 +100,19 @@ namespace EdgeDeflector
 
         static bool IsUri(string uristring)
         {
-            Uri uri = new Uri(uristring);
-            return uri.IsWellFormedOriginalString();
+            try
+            {
+                Uri uri = new Uri(uristring);
+                return uri.IsWellFormedOriginalString();
+            }
+            catch (System.UriFormatException)
+            {
+                return false;
+            }
+            catch (ArgumentNullException)
+            {
+                return false;
+            }
         }
 
         static bool IsHttpUri(string uri)
@@ -108,6 +127,17 @@ namespace EdgeDeflector
             return uri.StartsWith("microsoft-edge:", StringComparison.OrdinalIgnoreCase) && !uri.Contains(" ");
         }
 
+        static bool IsNonAuthoritativeWithUrlQueryParameter(string uri)
+        {
+            return uri.Contains("microsoft-edge:?") && uri.Contains("&url=");
+        }
+
+        static string GetURIFromCortanaLink(string uri)
+        {
+            NameValueCollection queryCollection = HttpUtility.ParseQueryString(uri);
+            return queryCollection["url"];
+        }
+
         static string RewriteMsEdgeUriSchema(string uri)
         {
             string msedge_protocol_pattern = "^microsoft-edge:/*";
@@ -120,6 +150,18 @@ namespace EdgeDeflector
                 return new_uri;
             }
 
+            // May be new-style Cortana URI - try and split out
+            if (IsNonAuthoritativeWithUrlQueryParameter(uri))
+            {
+                string cortanaUri = GetURIFromCortanaLink(uri);
+                if (IsHttpUri(cortanaUri))
+                {
+                    // Correctly form the new URI before returning
+                    return cortanaUri;
+                }
+            }
+
+            // defer fallback to web browser
             return "http://" + new_uri;
         }
 
@@ -163,8 +205,9 @@ namespace EdgeDeflector
                 uri = SwapBingForGoogle(uri);
                 OpenUri(uri);
             }
+
             // Install when running without argument
-            else if (args.Equals(null) || args.Length == 0)
+            else if (args.Length == 0)
             {
                 if (!IsElevated())
                 {
