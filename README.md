@@ -25,7 +25,7 @@ You don’t need to specify your browser of choice in EdgeDeflector. It will pic
 
 ## Will searches inside Cortana still use Bing?
 
-Yes. EdgeDeflector doesn’t interfere with either Cortana or the Windows shell in any way. All that EdgeDeflector does is intercept links as you open them in order to rewrite them to open with your preferred web browser.
+Yes. EdgeDeflector doesn’t interfere with either Cortana or the Windows shell in any way.
 
 ## “Intercepting links” sounds like it would affect my privacy?
 
@@ -33,7 +33,7 @@ Yes it does, but no. Everything is done on your local computer. EdgeDeflector re
 
 ## Will EdgeDeflector redirect Bing searches to Google?
 
-[No.](https://github.com/da2x/EdgeDeflector/wiki/Not-replacing-your-search-engine) You can use an extension in your favorite web browser to achieve this.
+YES! The sole reason for this fork's existence is to redirect Bing URLs to Google ones as they're passed to the default brower, removing the need to install a seperate Chrome extension.
 
 ## How do I uninstall EdgeDeflector?
 
